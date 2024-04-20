@@ -21,6 +21,32 @@ const createCurrentUser = async function (req: Request, res: Response) {
   }
 }
 
+const updateCurrentUser = async function (req: Request, res: Response) {
+  try {
+    const { name, address, country, city } = req.body // form data
+    // req.userId is available due to preceeding middleware
+    const user = await UserModel.findById(req.userId)
+
+    if (!user) {
+      return res.status(404).json({ message: "User doesn't exists! Error updating." })
+    }
+
+    user.name = name
+    user.address = address
+    user.country = country
+    user.city = city
+
+    await user.save()
+
+    res.json(user)
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Can't update user!" })
+  }
+}
+
 export default {
-  createCurrentUser
+  createCurrentUser,
+  updateCurrentUser
 }

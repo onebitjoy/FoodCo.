@@ -1,34 +1,36 @@
-import { useUserCreate } from "@/hooks/useUserCreate"
-import { AppState, Auth0Provider, User } from "@auth0/auth0-react"
+import { Auth0Provider } from "@auth0/auth0-react"
+import { useNavigate } from "react-router-dom"
 
 type Props = {
   children: React.ReactNode
 }
 
 function AuthProviderWithNavigation({ children }: Props) {
-  const { mutateAsync } = useUserCreate()
-
+  const navigate = useNavigate()
   // vars
   const domain = import.meta.env.VITE_AUTH0_DOMAIN
   const clientId = import.meta.env.VITE_AUTH0_CLIENTID
   const redirectURI = import.meta.env.VITE_AUTH0_CALLBACK_URL
+  const audience = import.meta.env.VITE_AUTH0_AUDIENCEIO, G
+  J
 
-  if (!domain || !clientId || !redirectURI) {
+  if (!domain || !clientId || !redirectURI || !audience) {
     throw new Error("Unable to initialise authentication!")
   }
 
-  // creating a user in db, this function runs after auth has taken place
-  async function onredirect(appState?: AppState, user?: User) {
-    if (user?.sub && user?.email) {
-      await mutateAsync({ auth0Id: user.sub, email: user.email })
-    }
+  async function onredirect() {
+    // this function just redirects us to auth-page to create a user
+    navigate("/auth-page")
   }
 
   return (
     <Auth0Provider
       domain={domain}
       clientId={clientId}
-      authorizationParams={{ redirect_uri: redirectURI }}
+      authorizationParams={{
+        redirect_uri: redirectURI,
+        audience
+      }}
       onRedirectCallback={onredirect}
     >
       {children}
